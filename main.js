@@ -10,10 +10,10 @@ const categories = {
 };
 
 const schedule = [
-  { time: "06:00 AM", task: "Write blog", category: "Deep Work" },
-  { time: "07:00 AM", task: "Client call", category: "Meetings" },
-  { time: "01:30 PM", task: "Gym", category: "Personal" },
-  { time: "03:00 PM", task: "Email cleanup", category: "Admin" },
+  { time: "6:00 AM", task: "Write blog", category: "Deep Work" },
+  { time: "7:00 AM", task: "Client call", category: "Meetings" },
+  { time: "1:30 PM", task: "Gym", category: "Personal" },
+  { time: "3:00 PM", task: "Email cleanup", category: "Admin" },
 ];
 
 function generateGrid() {
