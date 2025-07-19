@@ -17,6 +17,8 @@ const schedule = [
 ];
 
 function generateGrid() {
+  timeGrid.innerHTML = '';
+  reportList.innerHTML = '';
   const startHour = 5;
   const endHour = 24;
 
@@ -24,7 +26,7 @@ function generateGrid() {
     for (let m = 0; m < 60; m += 30) {
       const hour = h % 12 === 0 ? 12 : h % 12;
       const suffix = h < 12 ? "AM" : "PM";
-      const minute = m === 0 ? "00" : m;
+      const minute = String(m).padStart(2, '0');
       const label = `${hour}:${minute} ${suffix}`;
 
       const timeDiv = document.createElement('div');
@@ -49,6 +51,7 @@ function generateGrid() {
 }
 
 function generateReport() {
+  reportList.innerHTML = '';
   const report = {};
   for (const task of schedule) {
     if (!report[task.category]) report[task.category] = 0;
