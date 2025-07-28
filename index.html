@@ -9,7 +9,23 @@
 <body>
   <div class="container">
     <h1>Time-Blocking App</h1>
+    <div class="date-nav">
+      <button id="prevDay">&#8592;</button>
+      <span id="currentDate"></span>
+      <button id="nextDay">&#8594;</button>
+    </div>
+    <div class="date-strip" id="dateStrip"></div>
+    <div class="calendar-container" id="calendarContainer"></div>
     <div class="grid-container" id="timeGrid"></div>
+    <div class="category-manager" id="categoryManager">
+      <h2>Categories</h2>
+      <form id="categoryForm">
+        <input type="text" id="newCategoryName" placeholder="New category name" />
+        <input type="color" id="newCategoryColor" value="#2979FF" />
+        <button type="submit">Add</button>
+      </form>
+      <ul id="categoryList"></ul>
+    </div>
     <div class="report" id="reportContainer">
       <h2>Daily Report</h2>
       <ul id="reportList"></ul>
