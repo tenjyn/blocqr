@@ -131,6 +131,10 @@ function generateGrid() {
 
   const startHour = 0, endHour = 24;
 
+  // Handlers for resizing blocks within this grid instance
+  let mouseMoveHandler;
+  let mouseUpHandler;
+
   // For each day in the week, create a column
   days.forEach((day, dayIdx) => {
     const dateStr = getDateString(day);
