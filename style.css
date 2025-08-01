@@ -249,13 +249,6 @@ body {
 }
 /* --- Cleaned and deduplicated advanced grid, overlay, dark theme, dropdown, and responsive styles for time-blocking app --- */
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #181c20;
-  color: #fff;
-}
-
 .block-category-dropdown {
   background: #23272e;
   color: #e0e6ed;

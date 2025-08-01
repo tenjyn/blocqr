@@ -20,7 +20,6 @@ function saveCategories() {
 }
 let categories = loadCategories();
 // Track if a block is being edited inline
-let isEditingBlock = false;
 
 // Store schedules by date string (YYYY-MM-DD)
 let schedules = {};
@@ -80,15 +79,38 @@ function renderTaskBankAndCategories() {
     allTasks = allTasks.concat(schedule.map(t => ({...t, date: dateStr})));
   });
   // Render task bank
-  taskBank.innerHTML = '<h3>Task Bank (This Week)</h3>';
+  taskBank.innerHTML = '';
+  const heading = document.createElement('h3');
+  heading.textContent = 'Task Bank (This Week)';
+  taskBank.appendChild(heading);
   if (allTasks.length === 0) {
-    taskBank.innerHTML += '<div style="color:#888">No tasks for this week.</div>';
+    const empty = document.createElement('div');
+    empty.style.color = '#888';
+    empty.textContent = 'No tasks for this week.';
+    taskBank.appendChild(empty);
   } else {
     const ul = document.createElement('ul');
     ul.className = 'task-bank-list';
     allTasks.forEach(task => {
       const li = document.createElement('li');
-      li.innerHTML = `<span style='font-weight:bold;color:${categories[task.category] || '#fff'}'>${task.time}</span> <span>${task.task}</span> <span style='color:${categories[task.category] || '#fff'}'>(${task.category})</span> <span style='color:#888;font-size:0.9em'>[${task.date}]</span>`;
+      const timeSpan = document.createElement('span');
+      timeSpan.style.fontWeight = 'bold';
+      timeSpan.style.color = categories[task.category] || '#fff';
+      timeSpan.textContent = task.time;
+      const taskSpan = document.createElement('span');
+      taskSpan.textContent = ` ${task.task} `;
+      const catSpan = document.createElement('span');
+      catSpan.style.color = categories[task.category] || '#fff';
+      catSpan.textContent = `(${task.category})`;
+      const dateSpan = document.createElement('span');
+      dateSpan.style.color = '#888';
+      dateSpan.style.fontSize = '0.9em';
+      dateSpan.textContent = `[${task.date}]`;
+      li.appendChild(timeSpan);
+      li.appendChild(taskSpan);
+      li.appendChild(catSpan);
+      li.appendChild(document.createTextNode(' '));
+      li.appendChild(dateSpan);
       ul.appendChild(li);
     });
     taskBank.appendChild(ul);
@@ -101,15 +123,49 @@ function renderTaskBankAndCategories() {
     catList.className = 'category-dashboard';
     taskBank.appendChild(catList);
   }
-  catList.innerHTML = '<h4>Categories</h4>';
-  const ul = document.createElement('ul');
-  ul.className = 'category-dashboard-list';
+  catList.innerHTML = '';
+  const catHeader = document.createElement('h4');
+  catHeader.textContent = 'Categories';
+  catList.appendChild(catHeader);
+  const catUl = document.createElement('ul');
+  catUl.className = 'category-dashboard-list';
   Object.entries(categories).forEach(([cat, color]) => {
     const li = document.createElement('li');
-    li.innerHTML = `<span style='display:inline-block;width:16px;height:16px;background:${color};border-radius:3px;margin-right:6px;vertical-align:middle;'></span> <span>${cat}</span>`;
-    ul.appendChild(li);
+    const box = document.createElement('span');
+    box.style.display = 'inline-block';
+    box.style.width = '16px';
+    box.style.height = '16px';
+    box.style.background = color;
+    box.style.borderRadius = '3px';
+    box.style.marginRight = '6px';
+    box.style.verticalAlign = 'middle';
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = cat;
+    li.appendChild(box);
+    li.appendChild(nameSpan);
+    catUl.appendChild(li);
   });
-  catList.appendChild(ul);
+  catList.appendChild(catUl);
+}
+
+function renderCategoryList() {
+  if (!categoryList) return;
+  categoryList.innerHTML = '';
+  Object.entries(categories).forEach(([name, color]) => {
+    const li = document.createElement('li');
+    const box = document.createElement('span');
+    box.style.display = 'inline-block';
+    box.style.width = '16px';
+    box.style.height = '16px';
+    box.style.background = color;
+    box.style.borderRadius = '3px';
+    box.style.marginRight = '6px';
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = name;
+    li.appendChild(box);
+    li.appendChild(nameSpan);
+    categoryList.appendChild(li);
+  });
 }
 
 function generateGrid() {
@@ -119,309 +175,66 @@ function generateGrid() {
   const gridContainer = document.createElement('div');
   gridContainer.className = 'day-grid-container';
 
-  // Calculate start of week (Sunday)
   const weekStart = new Date(currentDate);
   weekStart.setDate(currentDate.getDate() - currentDate.getDay());
-  const days = [];
+
+  const startHour = 0,
+    endHour = 24;
+
   for (let i = 0; i < 7; i++) {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + i);
-    days.push(d);
-  }
-
-  const startHour = 0, endHour = 24;
-
-  // For each day in the week, create a column
-  days.forEach((day, dayIdx) => {
+    const day = new Date(weekStart);
+    day.setDate(weekStart.getDate() + i);
     const dateStr = getDateString(day);
-        // ...existing code...
-            const availableMinutes = endMinutes - blockStartMinutes;
-            // Always allow at least 1 slot
-            resizeHandle._maxSlots = Math.max(1, Math.floor(availableMinutes / 15));
+    const schedule = schedules[dateStr] || [];
 
-            mouseMoveHandler = function(e) {
-              if (!isResizing) return;
-              // Only allow downward expansion (bottom edge)
-              const deltaY = Math.max(0, e.clientY - startY); // Prevent shrinking above start
-              let newHeight = Math.max(24, startHeight + deltaY);
-              // Snap to 24px increments (15min slots)
-              let slots = Math.round(newHeight / 24);
-              // Limit to available slots to EOD
-              slots = Math.max(1, Math.min(slots, resizeHandle._maxSlots));
-              newHeight = slots * 24;
-              gridBlockDiv.style.height = newHeight + 'px';
-            };
-            mouseUpHandler = function(e) {
-              if (!isResizing) return;
-              isResizing = false;
-              gridBlockDiv.classList.remove('resizing');
-              document.body.style.userSelect = '';
-              let newHeight = parseInt(gridBlockDiv.style.height) || 24;
-              let slots = Math.max(1, Math.round(newHeight / 24));
-              slots = Math.max(1, Math.min(slots, resizeHandle._maxSlots));
-              foundTask.merge = slots;
-              schedules[dateStr] = schedule;
-              saveSchedules();
-              generateGrid();
-              document.removeEventListener('mousemove', mouseMoveHandler);
-              document.removeEventListener('mouseup', mouseUpHandler);
-            };
-            document.addEventListener('mousemove', mouseMoveHandler);
-            document.addEventListener('mouseup', mouseUpHandler);
-          });
-          // --- End resize handle ---
-          // Edit with dropdown
-          gridBlockDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (isEditingBlock) return;
-            isEditingBlock = true;
-            // Save original values
-            const origTask = foundTask.task;
-            const origCategory = foundTask.category;
-            // Create select for category
-            const select = document.createElement('select');
-            Object.entries(categories).forEach(([cat, color]) => {
-              const opt = document.createElement('option');
-              opt.value = cat;
-              opt.textContent = cat;
-              opt.style.background = color;
-              if (cat === origCategory) opt.selected = true;
-              select.appendChild(opt);
-            });
-            select.className = 'block-category-dropdown';
-            select.style.fontSize = '12px';
-            select.style.marginRight = '4px';
-            select.style.height = '22px';
-            // Create input for task name
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = origTask;
-            input.style.width = '60%';
-            input.style.fontSize = '12px';
-            input.style.marginRight = '4px';
-            input.style.height = '22px';
-            // Save button
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = '✔';
-            saveBtn.style.fontSize = '13px';
-            saveBtn.style.padding = '0 4px';
-            saveBtn.style.marginRight = '2px';
-            saveBtn.style.height = '22px';
-            // Cancel button
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = '✕';
-            cancelBtn.style.fontSize = '13px';
-            cancelBtn.style.padding = '0 4px';
-            cancelBtn.style.height = '22px';
-            // Replace content
-            gridBlockDiv.innerHTML = '';
-            gridBlockDiv.appendChild(select);
-            gridBlockDiv.appendChild(input);
-            gridBlockDiv.appendChild(saveBtn);
-            gridBlockDiv.appendChild(cancelBtn);
-            input.focus();
+    const dayCol = document.createElement('div');
+    dayCol.className = 'day-grid-column';
+    if (getDateString(day) === getDateString(currentDate)) dayCol.classList.add('active-day');
+    if (getDateString(day) === getDateString(new Date())) dayCol.classList.add('today-day');
 
-            function finishEdit() {
-              isEditingBlock = false;
-              generateGrid();
-            }
-            function saveEdit() {
-              const newTask = input.value.trim();
-              const newCat = select.value;
-              if (!newTask || !categories[newCat]) {
-                finishEdit();
-                return;
-              }
-              foundTask.task = newTask;
-              foundTask.category = newCat;
-              schedules[dateStr] = schedule;
-              saveSchedules();
-              finishEdit();
-            }
-            function cancelEdit() {
-              finishEdit();
-            }
-            saveBtn.addEventListener('click', (ev) => {
-              ev.preventDefault();
-              saveEdit();
-            });
-            cancelBtn.addEventListener('click', (ev) => {
-              ev.preventDefault();
-              cancelEdit();
-            });
-            input.addEventListener('keydown', (ev) => {
-              if (ev.key === 'Enter') saveEdit();
-              if (ev.key === 'Escape') cancelEdit();
-            });
-            select.addEventListener('keydown', (ev) => {
-              if (ev.key === 'Enter') saveEdit();
-              if (ev.key === 'Escape') cancelEdit();
-            });
-            // Only finish edit if neither input nor select is focused
-            function blurHandler() {
-              setTimeout(() => {
-                if (document.activeElement !== input && document.activeElement !== select && document.activeElement !== saveBtn && document.activeElement !== cancelBtn) {
-                  cancelEdit();
-                }
-              }, 10);
-            }
-            input.addEventListener('blur', blurHandler);
-            select.addEventListener('blur', blurHandler);
-          });
-        } else {
-          gridBlockDiv.textContent = '+';
-          gridBlockDiv.classList.add('add-task');
-          // Drag-and-drop target
-          gridBlockDiv.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            gridBlockDiv.classList.add('drag-over');
-          });
-          gridBlockDiv.addEventListener('dragleave', () => {
-            gridBlockDiv.classList.remove('drag-over');
-          });
-          gridBlockDiv.addEventListener('drop', (e) => {
-            e.preventDefault();
-            gridBlockDiv.classList.remove('drag-over');
-            const data = e.dataTransfer.getData('text/plain');
-            if (!data) return;
-            let parsed;
-            try { parsed = JSON.parse(data); } catch { return; }
-            if (!parsed || !parsed.date || !parsed.time) return;
-            // Remove from old schedule
-            let oldSchedule = schedules[parsed.date] || [];
-            const idx = oldSchedule.findIndex(t => t.time === parsed.time && t.task === parsed.task && t.category === parsed.category);
-            if (idx !== -1) {
-              const [movedTask] = oldSchedule.splice(idx, 1);
-              // Update time and date
-              movedTask.time = label;
-              // Add to new schedule
-              let newSchedule = schedules[dateStr] || [];
-              newSchedule.push(movedTask);
-              schedules[parsed.date] = oldSchedule;
-              schedules[dateStr] = newSchedule;
-              saveSchedules();
-              generateGrid();
-            }
-          });
-          // Add with dropdown
-          gridBlockDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (isEditingBlock) return;
-            isEditingBlock = true;
-            // Create select for category
-            const select = document.createElement('select');
-            Object.entries(categories).forEach(([cat, color]) => {
-              const opt = document.createElement('option');
-              opt.value = cat;
-              opt.textContent = cat;
-              opt.style.background = color;
-              select.appendChild(opt);
-            });
-            select.className = 'block-category-dropdown';
-            select.style.fontSize = '12px';
-            select.style.marginRight = '4px';
-            select.style.height = '22px';
-            // Create input for task name
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Task name';
-            input.style.width = '60%';
-            input.style.fontSize = '12px';
-            input.style.marginRight = '4px';
-            input.style.height = '22px';
-            // Save button
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = '✔';
-            saveBtn.style.fontSize = '13px';
-            saveBtn.style.padding = '0 4px';
-            saveBtn.style.marginRight = '2px';
-            saveBtn.style.height = '22px';
-            // Cancel button
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = '✕';
-            cancelBtn.style.fontSize = '13px';
-            cancelBtn.style.padding = '0 4px';
-            cancelBtn.style.height = '22px';
-            // Replace content
-            gridBlockDiv.innerHTML = '';
-            gridBlockDiv.appendChild(select);
-            gridBlockDiv.appendChild(input);
-            gridBlockDiv.appendChild(saveBtn);
-            gridBlockDiv.appendChild(cancelBtn);
-            input.focus();
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'day-label';
+    labelDiv.textContent = day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    dayCol.appendChild(labelDiv);
 
-            function finishEdit() {
-              isEditingBlock = false;
-              generateGrid();
-            }
-            function saveEdit() {
-              const newTask = input.value.trim();
-              const newCat = select.value;
-              if (!newTask || !categories[newCat]) {
-                finishEdit();
-                return;
-              }
-              // Prevent duplicate tasks at same time
-              let newSchedule = schedules[dateStr] || [];
-              if (newSchedule.some(s => normalizeTimeString(s.time) === normalizeTimeString(label))) {
-                alert('A task already exists at this time.');
-                finishEdit();
-                return;
-              }
-              newSchedule.push({ time: label, task: newTask, category: newCat });
-              schedules[dateStr] = newSchedule;
-              saveSchedules();
-              finishEdit();
-            }
-            function cancelEdit() {
-              finishEdit();
-            }
-            saveBtn.addEventListener('click', (ev) => {
-              ev.preventDefault();
-              saveEdit();
-            });
-            cancelBtn.addEventListener('click', (ev) => {
-              ev.preventDefault();
-              cancelEdit();
-            });
-            input.addEventListener('keydown', (ev) => {
-              if (ev.key === 'Enter') saveEdit();
-              if (ev.key === 'Escape') cancelEdit();
-            });
-            select.addEventListener('keydown', (ev) => {
-              if (ev.key === 'Enter') saveEdit();
-              if (ev.key === 'Escape') cancelEdit();
-            });
-            // Only finish edit if neither input nor select is focused
-            function blurHandler() {
-              setTimeout(() => {
-                if (document.activeElement !== input && document.activeElement !== select && document.activeElement !== saveBtn && document.activeElement !== cancelBtn) {
-                  cancelEdit();
-                }
-              }, 10);
-            }
-            input.addEventListener('blur', blurHandler);
-            select.addEventListener('blur', blurHandler);
-          });
-        }
+    for (let h = startHour; h < endHour; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        const labelDate = new Date(0, 0, 0, h, m);
+        const label = labelDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
         const row = document.createElement('div');
         row.className = 'grid-row';
-        row.style.display = 'flex';
-        row.style.flexDirection = 'row';
-        row.style.alignItems = 'center';
-        row.style.width = '100%';
-        row.style.height = '24px';
+        const gridTimeDiv = document.createElement('div');
+        gridTimeDiv.className = 'grid-time';
+        gridTimeDiv.textContent = label;
+        const gridBlockDiv = document.createElement('div');
+        gridBlockDiv.className = 'grid-block';
+
+        const found = schedule.find(t => normalizeTimeString(t.time) === normalizeTimeString(label));
+        if (found) {
+          gridBlockDiv.classList.add('task');
+          gridBlockDiv.style.borderColor = categories[found.category] || '#2979FF';
+          gridBlockDiv.style.color = categories[found.category] || '#fff';
+          gridBlockDiv.textContent = found.task;
+        } else {
+          gridBlockDiv.classList.add('add-task');
+          gridBlockDiv.textContent = '+';
+        }
+
         row.appendChild(gridTimeDiv);
         row.appendChild(gridBlockDiv);
         dayCol.appendChild(row);
       }
     }
+
     gridContainer.appendChild(dayCol);
-  });
+  }
+
   timeGrid.appendChild(gridContainer);
-  // Add report section
+
   if (reportList) {
-    reportList.innerHTML = '<h3 style="margin:0 0 8px 0;font-size:1.1em;">Today\'s Tasks</h3>';
+    reportList.innerHTML = '';
+    const schedule = schedules[getDateString(currentDate)] || [];
     if (schedule.length === 0) {
       const li = document.createElement('li');
       li.textContent = 'No tasks scheduled.';
@@ -429,13 +242,21 @@ function generateGrid() {
     } else {
       schedule.forEach(task => {
         const li = document.createElement('li');
-        li.innerHTML = `<span style='font-weight:bold;color:${categories[task.category] || '#fff'}'>${task.time}</span>: <span>${task.task}</span> <span style='color:${categories[task.category] || '#fff'}'>(${task.category})</span>`;
+        const timeSpan = document.createElement('span');
+        timeSpan.style.fontWeight = 'bold';
+        timeSpan.style.color = categories[task.category] || '#fff';
+        timeSpan.textContent = task.time;
+        const taskSpan = document.createElement('span');
+        taskSpan.textContent = `: ${task.task} `;
+        const catSpan = document.createElement('span');
+        catSpan.style.color = categories[task.category] || '#fff';
+        catSpan.textContent = `(${task.category})`;
+        li.appendChild(timeSpan);
+        li.appendChild(taskSpan);
+        li.appendChild(catSpan);
         reportList.appendChild(li);
       });
     }
-    reportList.style.display = 'block';
-    reportList.style.margin = '32px 0 0 0';
-    reportList.style.maxWidth = '320px';
   }
 }
 
@@ -601,6 +422,22 @@ document.addEventListener('DOMContentLoaded', function() {
   newCategoryName = document.getElementById('newCategoryName');
   newCategoryColor = document.getElementById('newCategoryColor');
   categoryList = document.getElementById('categoryList');
+
+  renderCategoryList();
+  if (categoryForm) {
+    categoryForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = newCategoryName.value.trim();
+      const color = newCategoryColor.value || '#2979FF';
+      if (!name) return;
+      categories[name] = color;
+      saveCategories();
+      newCategoryName.value = '';
+      renderCategoryList();
+      renderTaskBankAndCategories();
+      generateGrid();
+    });
+  }
 
   generateGrid();
   renderCalendar();
