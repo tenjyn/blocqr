@@ -6,8 +6,12 @@ let dateStrip, calendarContainer, categoryManager, categoryForm, newCategoryName
 
 // Load categories from localStorage or use defaults
 function loadCategories() {
-  const saved = localStorage.getItem('categories');
-  if (saved) return JSON.parse(saved);
+  try {
+    const saved = localStorage.getItem('categories');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    console.warn('localStorage unavailable, using default categories');
+  }
   return {
     "Deep Work": "#2979FF",
     "Meetings": "#D32F2F",
@@ -16,7 +20,11 @@ function loadCategories() {
   };
 }
 function saveCategories() {
-  localStorage.setItem('categories', JSON.stringify(categories));
+  try {
+    localStorage.setItem('categories', JSON.stringify(categories));
+  } catch (e) {
+    console.warn('localStorage unavailable, categories not saved');
+  }
 }
 let categories = loadCategories();
 // Track if a block is being edited inline
@@ -25,12 +33,20 @@ let categories = loadCategories();
 let schedules = {};
 // Load schedules from localStorage
 function loadSchedules() {
-  const saved = localStorage.getItem('schedules');
-  if (saved) return JSON.parse(saved);
+  try {
+    const saved = localStorage.getItem('schedules');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    console.warn('localStorage unavailable, using empty schedules');
+  }
   return {};
 }
 function saveSchedules() {
-  localStorage.setItem('schedules', JSON.stringify(schedules));
+  try {
+    localStorage.setItem('schedules', JSON.stringify(schedules));
+  } catch (e) {
+    console.warn('localStorage unavailable, schedules not saved');
+  }
 }
 schedules = loadSchedules();
 
