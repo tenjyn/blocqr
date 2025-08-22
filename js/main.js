@@ -5,7 +5,10 @@ let categories = loadCategories();
 let schedules = loadSchedules();
 
 function getDateString(date) {
-  return date.toISOString().split('T')[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 let currentDate = new Date();
@@ -36,7 +39,7 @@ function generateGrid() {
   currentDateSpan.textContent = currentDate.toDateString();
   timeGrid.innerHTML = '';
   for (let h = 6; h < 22; h++) {
-    const time = new Date(0,0,0,h).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    const time = `${String(h).padStart(2, '0')}:00`;
     const row = document.createElement('div');
     row.className = 'grid-row';
     const timeCell = document.createElement('div');
@@ -50,8 +53,10 @@ function generateGrid() {
       block.style.background = categories[task.category] || '#999';
       block.addEventListener('click', () => {
         const name = prompt('Edit task or leave empty to delete', task.task);
-        if (name) {
-          task.task = name;
+        if (name === null) return; // cancel
+        const trimmed = name.trim();
+        if (trimmed) {
+          task.task = trimmed;
         } else {
           const idx = schedule.indexOf(task);
           if (idx !== -1) schedule.splice(idx,1);
@@ -64,9 +69,12 @@ function generateGrid() {
       block.textContent = '+';
       block.addEventListener('click', () => {
         const name = prompt('Task name');
-        if (!name) return;
+        if (name === null) return;
+        const trimmed = name.trim();
+        if (!trimmed) return;
         const cat = prompt('Category', Object.keys(categories)[0] || '');
-        schedule.push({time, task:name, category:cat});
+        if (cat === null) return;
+        schedule.push({time, task:trimmed, category:cat});
         schedules[dateStr] = schedule;
         saveSchedules(schedules);
         generateGrid();
