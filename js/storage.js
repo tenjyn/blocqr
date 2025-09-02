@@ -1,5 +1,9 @@
 function loadCategories() {
-
+  try {
+    return JSON.parse(localStorage.getItem('categories')) || {};
+  } catch {
+    return {};
+  }
 }
 
 function saveCategories(categories) {
@@ -7,7 +11,11 @@ function saveCategories(categories) {
 }
 
 function loadSchedules() {
-
+  try {
+    return JSON.parse(localStorage.getItem('schedules')) || {};
+  } catch {
+    return {};
+  }
 }
 
 function saveSchedules(schedules) {

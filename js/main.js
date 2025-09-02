@@ -5,7 +5,8 @@ let categories = loadCategories();
 let schedules = loadSchedules();
 
 function getDateString(date) {
-
+  // Format a date as YYYY-MM-DD for use as a schedule key
+  return date.toISOString().split('T')[0];
 }
 
 let currentDate = new Date();
@@ -36,12 +37,51 @@ function generateGrid() {
   currentDateSpan.textContent = currentDate.toDateString();
   timeGrid.innerHTML = '';
   for (let h = 6; h < 22; h++) {
-
+    const time = `${String(h).padStart(2, '0')}:00`;
     const row = document.createElement('div');
     row.className = 'grid-row';
     const timeCell = document.createElement('div');
     timeCell.className = 'grid-time';
     timeCell.textContent = time;
+    const block = document.createElement('div');
+    block.className = 'grid-block';
+    const task = schedule.find(t => t.time === time);
+    if (task) {
+      block.classList.add('task');
+      block.textContent = task.task;
+      block.style.background = categories[task.category] || '#999';
+      block.addEventListener('click', () => {
+        const name = prompt('Edit task or leave empty to delete', task.task);
+        if (name === null) return;
+        const trimmed = name.trim();
+        if (trimmed) {
+          task.task = trimmed;
+        } else {
+          const idx = schedule.indexOf(task);
+          if (idx !== -1) schedule.splice(idx, 1);
+        }
+        schedules[dateStr] = schedule;
+        saveSchedules(schedules);
+        generateGrid();
+        generateMultiDayGrid();
+      });
+    } else {
+      block.classList.add('add-task');
+      block.textContent = '+';
+      block.addEventListener('click', () => {
+        const name = prompt('Task name');
+        if (name === null) return;
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        const cat = prompt('Category', Object.keys(categories)[0] || '');
+        if (cat === null) return;
+        schedule.push({ time, task: trimmed, category: cat });
+        schedules[dateStr] = schedule;
+        saveSchedules(schedules);
+        generateGrid();
+        generateMultiDayGrid();
+      });
+    }
 
     row.appendChild(timeCell);
     row.appendChild(block);
