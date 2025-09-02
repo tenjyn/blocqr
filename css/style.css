@@ -461,6 +461,8 @@ body {
   display: flex;
   justify-content: center;
   margin-bottom: 16px;
+  /* allow horizontal scrolling so the entire calendar is always accessible */
+  overflow-x: auto;
 }
 .calendar {
   background: #181a1f;
@@ -468,6 +470,9 @@ body {
   box-shadow: 0 2px 8px #0003;
   padding: 12px 18px 18px 18px;
   min-width: 320px;
+  /* keep width constrained to its content and fit smaller viewports */
+  width: fit-content;
+  max-width: 100%;
 }
 .calendar-header {
   text-align: center;
