@@ -276,8 +276,8 @@ body {
   min-width: 1200px;
   width: 100%;
   max-width: none;
-  height: calc(24px * 16);
-  min-height: calc(24px * 16);
+  height: calc(24px * 96);
+  min-height: calc(24px * 96);
   align-items: stretch;
   background: #14161a;
   border-radius: 12px;
